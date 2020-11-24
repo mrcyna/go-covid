@@ -1,3 +1,3 @@
 # Covid19 IRAN
-Pretty simple CLI application to compute final salary based on timesheet.
+a simple web application to show covid19 data in IRAN
 <p align="center"><img src="screenshot.png"></p>
