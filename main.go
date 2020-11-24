@@ -18,11 +18,16 @@ func httpserver(w http.ResponseWriter, _ *http.Request) {
 	}
 
 	var axis []string
-	var cases []opts.LineData
+	var confirmed []opts.LineData
+	var recovered []opts.LineData
+	var deaths []opts.LineData
 
-	for a, c := range statistics {
+	for a, r := range statistics {
 		axis = append(axis, a)
-		cases = append(cases, opts.LineData{Value: c})
+		confirmed = append(confirmed, opts.LineData{Value: r.Confirmed})
+		recovered = append(recovered, opts.LineData{Value: r.Recovered})
+		deaths = append(deaths, opts.LineData{Value: r.Deaths})
+
 	}
 
 	line := charts.NewLine()
@@ -35,7 +40,9 @@ func httpserver(w http.ResponseWriter, _ *http.Request) {
 		}))
 
 	line.SetXAxis(axis).
-		AddSeries("Cases", cases).
+		AddSeries("Confirmed Cases", confirmed).
+		AddSeries("Recovered Cases", recovered).
+		AddSeries("Death Cases", deaths).
 		SetSeriesOptions(charts.WithLineChartOpts(opts.LineChart{Smooth: true}))
 	line.Render(w)
 }

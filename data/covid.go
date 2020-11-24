@@ -23,16 +23,57 @@ type Response []struct {
 	Date        string `json:"Date"`
 }
 
-func CovidData(country string, days int) (map[string]int, error) {
+type Result map[string]struct {
+	Confirmed int
+	Recovered int
+	Deaths    int
+}
+
+func CovidData(country string, days int) (Result, error) {
 
 	const fName = "CovidData"
+
+	confirmed, err := fetchCovidData("confirmed", country, days)
+	if err != nil {
+		return Result{}, fmt.Errorf("%v: %v", fName, err.Error())
+	}
+
+	recovered, err := fetchCovidData("recovered", country, days)
+	if err != nil {
+		return Result{}, fmt.Errorf("%v: %v", fName, err.Error())
+	}
+
+	deaths, err := fetchCovidData("deaths", country, days)
+	if err != nil {
+		return Result{}, fmt.Errorf("%v: %v", fName, err.Error())
+	}
+
+	result := make(Result)
+	for day, _ := range confirmed {
+		result[day] = struct {
+			Confirmed int
+			Recovered int
+			Deaths    int
+		}{
+			Confirmed: confirmed[day],
+			Recovered: recovered[day],
+			Deaths:    deaths[day],
+		}
+	}
+
+	return result, nil
+}
+
+func fetchCovidData(status, country string, days int) (map[string]int, error) {
+
+	const fName = "fetchCovidData"
 
 	// Times
 	dtTo := time.Now().Format(dateLayout)
 	dtFrom := time.Now().AddDate(0, 0, days*-1).Format(dateLayout)
 
 	// Base API URL
-	url := fmt.Sprintf("https://api.covid19api.com/country/%s/status/confirmed?from=%s&to=%s", country, dtFrom, dtTo)
+	url := fmt.Sprintf("https://api.covid19api.com/country/%s/status/%s?from=%s&to=%s", country, status, dtFrom, dtTo)
 
 	// Make HTTP Request
 	req, _ := http.NewRequest("GET", url, nil)
